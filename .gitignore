@@ -1,0 +1,22 @@
+# Solo se publica el código. Todo lo demás (juego, motores Wine, prefijos, builds, pruebas,
+# referencias, iconos sacados del exe) queda afuera.
+/*
+!/.gitignore
+!/README.md
+!/app/
+!/herramientas/
+!/servidor/
+!/notas/
+
+/app/PES6
+/app/PES6_arm64
+/app/PES6_x86_64
+/herramientas/captura_ventana
+/servidor/.venv/
+/servidor/datos/
+/servidor/log/*
+!/servidor/log/readme
+.DS_Store
+__pycache__/
+*.pyc
+*.log

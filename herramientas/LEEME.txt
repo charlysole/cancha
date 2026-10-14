@@ -1,0 +1,46 @@
+PES6 para Mac
+=============
+
+Esta app corre PES6 (con el parche Phoenix) en cualquier Mac, Intel o Apple Silicon, y permite
+jugar online entre amigos sin registrarse en ningún sitio.
+
+Instalación
+-----------
+1. Arrastrá la carpeta «PES6 Mac» a Aplicaciones.
+2. Conseguí el juego: PES6 Phoenix Patch 2025/26 Final Season (gratis, trae el juego completo).
+     Buscalo en el foro de la comunidad PES6.ES (hilo oficial del parche).
+   Es un instalador de Windows: instalalo en una PC con Windows y anotá el número de serie
+   que usás (la app te lo pide para el online). Después copiá la carpeta instalada
+   (la que tiene PES6.exe) adentro de «PES6 Mac», al lado de PES6.app.
+   Si la tenés en otro lado, la app te la pide la primera vez.
+   Conviene la misma versión que tu amigo (Phoenix 25.12): si las plantillas son distintas,
+   el partido se desincroniza.
+3. Abrí PES6.app. En Mac con Apple Silicon te puede pedir instalar Rosetta (una sola vez).
+
+Jugar
+-----
+- Jugar: el juego normal.
+- Hostear partido: tu Mac hace de servidor. Te muestra una dirección (tu IP pública):
+  pasásela a tu amigo. La app abre sola los puertos del router (UPnP). Si tu router no
+  lo permite, te dice qué puertos abrir a mano.
+- Unirse: escribí la dirección que te pasó el que hostea y tocá «Unirse».
+
+Para el online el juego pide tu CÓDIGO DE REGISTRO de PES6 (el serial de tu copia). La app
+lo pide una vez y lo guarda en esta Mac. La contraseña puede ser cualquiera: la cuenta se
+crea sola en el servidor del que hostea.
+
+Opciones
+--------
+- Pantalla completa: casilla en la ventana de inicio.
+- Calidad gráfica (menú PES6 > Calidad gráfica): automática según tu Mac, o fija.
+- Controles…: abre el configurador del juego (teclado y joysticks, pestañas Player1-8).
+  Los mandos de PlayStation, Xbox y similares se reconocen por Bluetooth o USB.
+
+Instrucciones completas: https://github.com/charlysole/pes6-online-mac
+
+Problemas
+---------
+El registro de la última sesión está en:
+  ~/Library/Application Support/PES6 Mac/ultima_sesion.log
+y el del servidor (si hosteaste) en:
+  ~/Library/Application Support/PES6 Mac/servidor/servidor.log
