@@ -33,8 +33,27 @@ for f in tabla(traza, 'displayed-surfaces-interval'):
     r = f.get('detachment-reason', (None, ''))[1]
     if r:
         razones[r] += 1
+def entrega():
+    # Envíos del juego a Metal (no depende de que la pantalla los muestre: sirve con la pantalla bloqueada).
+    # Con la pantalla visible Metal agrupa los envíos por cuadro; sin pantalla cuenta cada envío (~3 por cuadro).
+    # Un hueco > 25 ms sin ningún envío = el juego se frenó.
+    primero = {}  # número de cuadro de Metal → primer commit (ns)
+    for f in tabla(traza, 'metal-command-buffer-frame-assignment'):
+        if 'PES6' in f['process'][1]:
+            n, t = f['frame-number'][1], int(f['commit-time'][0])
+            primero[n] = min(primero.get(n, t), t)
+    ts = sorted(t / 1e6 for t in primero.values())
+    if len(ts) < 2:
+        return print('entrega: sin datos')
+    d = [b - a for a, b in zip(ts, ts[1:])]
+    s_ = sorted(d); total = (ts[-1] - ts[0]) / 1000
+    print(f'envíos a Metal: {len(ts)} en {total:.1f} s  mediana entre envíos={s_[len(s_)//2]:.1f} ms  '
+          f'p99={s_[int(len(s_)*.99)]:.1f} ms  máx={s_[-1]:.1f} ms')
+    print(f'  huecos >25 ms: {sum(x > 25 for x in d)}  >50 ms: {sum(x > 50 for x in d)}  >100 ms: {sum(x > 100 for x in d)}'
+          f'  ({sum(x > 25 for x in d)/total:.2f} por segundo)')
+entrega()
 if not dur:
-    sys.exit('sin cuadros mostrados')
+    sys.exit('sin cuadros mostrados (¿pantalla bloqueada o ventana tapada?)')
 total = sum(dur)
 largos = [d for d in dur if d > 20]
 hist = collections.Counter(round(d / 16.667) for d in dur)

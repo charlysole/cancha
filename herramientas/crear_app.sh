@@ -29,6 +29,9 @@ rsync -a "$LIBS"/*.dylib "$APP/Contents/SharedSupport/wine/lib/"
     swiftc -O -target $a-apple-macos11 main.swift -o "PES6_$a"; done &&
     lipo -create PES6_arm64 PES6_x86_64 -output "$APP/Contents/MacOS/PES6")
 install -m 755 "$RAIZ/herramientas/lanzador.sh" "$R/lanzar_juego.sh"
+# Arreglos de PES6 para Mac que se cargan desde kitserver (caras sin tirones, ver herramientas/pes6mac)
+"$RAIZ/herramientas/pes6mac/compilar.sh"
+install -m 644 "$RAIZ/herramientas/pes6mac/pes6mac.dll" "$R/pes6mac.dll"
 print -r -- "${PES6_SERVIDOR_PREDETERMINADO:-}" > "$R/servidor_predeterminado.txt"
 
 # Python portátil, sin lo que no usa el servidor
@@ -68,8 +71,8 @@ cat > "$APP/Contents/Info.plist" <<'EOF'
     <key>CFBundleExecutable</key><string>PES6</string>
     <key>CFBundleIconFile</key><string>PES6</string>
     <key>CFBundlePackageType</key><string>APPL</string>
-    <key>CFBundleShortVersionString</key><string>1.1</string>
-    <key>CFBundleVersion</key><string>3</string>
+    <key>CFBundleShortVersionString</key><string>1.2</string>
+    <key>CFBundleVersion</key><string>4</string>
     <key>LSMinimumSystemVersion</key><string>11.0</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSPrincipalClass</key><string>NSApplication</string>

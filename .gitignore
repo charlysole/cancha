@@ -20,3 +20,5 @@
 __pycache__/
 *.pyc
 *.log
+/herramientas/*.exe
+/herramientas/pes6mac/pes6mac.dll

@@ -112,9 +112,23 @@ Pendientes del paso 1: pantalla completa / resolución (settings.exe), joystick,
 - GPU sobrada (1-2 ms por cuadro aun en 4K). Partido a 60 FPS con tirones sueltos (33 ms y ~80 ms).
 - **msync (`WINEMSYNC=1`) los reduce a la mitad y elimina los de ~80 ms** (sin narración: 0,27 → 0,13 por segundo).
   Además el wineserver de CX traslada las prioridades de hilo a macOS solo con msync.
-- Con narración siguen tirones de ~80 ms al hablar el comentarista (CRI ADX + DirectSound). No es el disco: la
-  lectura de `dat/s_sound.afs` tarda <1 ms (igual se precarga en caché al lanzar). Con WINEDEBUG +dsound,+file
-  activo no aparecieron (problema de tiempos entre hilos). Pendiente.
+- **Tirones con narración = fserv.dll (Faceserver 6.8.1 de kitserver), no el audio** (2026-10-16). Carga cada
+  cara/peinado HD la primera vez que un jugador aparece de cerca (y otra vez tras cada `releaseTextures`) con
+  D3DXCreateTextureFromFileEx (D3DX 8 estática dentro de fserv, filtro LINEAR) → matemática x87 → bajo Rosetta
+  60-400 ms por textura. Hallado con `herramientas/perfil.exe` (muestrea EIP del hilo de la ventana desde adentro
+  de Wine) + `analizar_perfil.py`: los tramos >35 ms sin esperar caían todos en fserv.dll. Sin fserv: 1 hueco en
+  2 min (con fserv: 7-14). Fuente: github.com/kitserver/kitserver6 src/fserv.cpp (getFaceTexture/getHairTexture).
+- **Arreglo: `herramientas/pes6mac/` → pes6mac.dll**, cargada por kload (última de la lista; el lanzador la copia a
+  kitserver/ y la agrega a kload.cfg una vez). Desvía fserv.dll+0x22e7 (D3DXCreateTextureFromFileExA, prólogo
+  55 8b ec 83 ec 10) con trampolín: PNG → stb_image + promedio de áreas (SSE) → 1-3 ms por textura; cualquier otro
+  caso sigue por la D3DX original. Medido (partido automático, 2 min, con narración, msync): huecos >50 ms
+  5/1/6 → 1/3/1, sin tramos de CPU >35 ms. Log en kitserver/pes6mac.log.
+- La precarga de s_sound.afs se sacó (el disco no influía: lecturas <1 ms).
+- Pruebas sin nadie al teclado: `herramientas/teclas.exe` (SendInput desde adentro de Wine) + `partido_auto.sh`
+  (España-Francia en Old Trafford con narración; opciones CON_PES6MAC, SIN_MODULO, SIN_COMENTARIO, PERFIL, MUESTRA,
+  PES6_EXE). Con la pantalla bloqueada macOS no muestra cuadros: se mide el ritmo de envíos a Metal (huecos >25 ms).
+- Pistas falsas: Sleep(15) estirado a ~58 ms = explorer.exe de Wine (prioridad IDLE), no el juego; parchear las
+  prioridades IDLE/LOWEST de los hilos de ADX en el exe no cambió nada.
 - Descartado: esync (sin cambio claro), renderer Vulkan de wined3d (mucho peor), ENB d3d8→d3d9 (algo peor),
   ReservedMemory 900 MB, resolución interna 1080p, sacar módulos de kitserver (sin cambio).
 - DXVK: los oficiales 2.x/3.x exigen geometry shaders (Metal no tiene). dgVoodoo (dlls_01 de Phoenix) + DXVK-macOS

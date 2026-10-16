@@ -83,12 +83,25 @@ elif [[ -f "$CFG" && "$(head -1 "$CFG")" == "$MARCA" ]]; then
     rm -f "$CFG"
 fi
 
-# --- 4. Relatos en memoria ---
-# CRI ADX lee los relatos de dat/s_sound.afs en pleno partido; si una lectura espera al disco, el juego
-# se traba (tirones al hablar el comentarista). Leerlo una vez lo deja en la caché de macOS (~770 MB).
-for AFS in "$JUEGO"/dat/s_sound.afs; do
-    [[ -f "$AFS" ]] && nice cat "$AFS" >/dev/null 2>&1 &
-done
+# --- 4. pes6mac.dll: arreglos para Mac que carga kitserver ---
+# fserv.dll (caras HD) carga cada cara con una D3DX que usa matemática x87: bajo Rosetta tarda 60-400 ms por
+# textura y el juego se traba (al nombrar jugadores el comentarista, en repeticiones). pes6mac.dll desvía esa
+# carga a una versión rápida. Se copia a kitserver/ y se agrega una sola vez a la lista de kload.cfg.
+agregar_pes6mac() {  # kload.cfg dll_origen
+    local KL=$1 ORIG=$2 n
+    [[ -f "$KL" && -f "$ORIG" && -f "${KL:h}/fserv.dll" ]] || return 0
+    cp -f "$ORIG" "${KL:h}/pes6mac.dll"
+    grep -aq 'pes6mac.dll' "$KL" && return 0
+    n=$(grep -a '^DLL.num' "$KL" | tr -dc '0-9')
+    [[ -n "$n" ]] || return 0
+    NOMBRE='kitserver\pes6mac.dll' awk -v n="$n" '
+        /^DLL\.num = / { sub(/= [0-9]+/, "= " (n + 1)) }
+        { print }
+        index($0, "DLL." (n - 1) " = ") == 1 { printf "DLL.%d = \"%s\"\r\n", n, ENVIRON["NOMBRE"] }
+    ' "$KL" > "$KL.nuevo" && mv -f "$KL.nuevo" "$KL"
+    echo "pes6mac.dll agregada a kload.cfg" >>"$LOG"
+}
+[[ "$EXE" != settings.exe ]] && agregar_pes6mac "$JUEGO/kitserver/kload.cfg" "${0:A:h}/pes6mac.dll"
 
 # --- 5. Lanzar y esperar a que termine ---
 cd "$JUEGO" || exit 1
