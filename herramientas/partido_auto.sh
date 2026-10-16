@@ -9,10 +9,17 @@ N=$1; G=${2:-90}
 APP="${PES6_APP:-$RAIZ/builds/PES6.app}"
 WINE="$APP/Contents/SharedSupport/wine/bin/wine"
 export WINEPREFIX="${WINEPREFIX:-$RAIZ/prefijo_bench}"
-export WINEDEBUG="${WINEDEBUG:-err-all,fixme-all}"
+export WINEDEBUG="${WINEDEBUG:-err-all,fixme-all,trace+fps}"
 export MVK_CONFIG_LOG_LEVEL=0
 export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-winemenubuilder.exe=d;mscoree=d;mshtml=d}"
 JUEGO="$RAIZ/PES6 Phoenix 2025-2026"
+# JUEGO_REAL=1: la instalación del usuario tal cual (app de Aplicaciones, su carpeta de juego y su prefijo),
+# lanzada con el lanzador de la app (msync, pes6mac.dll, kload.cfg) como cuando toca "Jugar".
+if [[ -n "$JUEGO_REAL" ]]; then
+    APP="/Applications/PES6 Mac/PES6.app"; WINE="$APP/Contents/SharedSupport/wine/bin/wine"
+    JUEGO="/Applications/PES6 Mac/PES6 Phoenix 2025-2026"
+    export WINEPREFIX="$HOME/Library/Application Support/PES6 Mac/prefijo" WINEMSYNC=1
+fi
 EXE="${PES6_EXE:-PES6.exe}"   # p. ej. PES6_prio.exe (copia parcheada)
 OUT="$RAIZ/pruebas/auto_$N"
 mkdir -p "$OUT"
@@ -62,7 +69,11 @@ open(p, 'wb').write(s.encode('latin-1'))
 PY
 fi
 cd "$JUEGO" || exit 1
-"$WINE" "$EXE" >"$OUT/wine.log" 2>&1 &
+if [[ -n "$JUEGO_REAL" ]]; then
+    PES6_JUEGO="$JUEGO" PES6_SERVIDOR="" "$APP/Contents/Resources/lanzar_juego.sh" >/dev/null 2>&1 &
+else
+    "$WINE" "$EXE" >"$OUT/wine.log" 2>&1 &
+fi
 espera 45; foto 0_titulo
 teclas "fg w500 ENTER w3500";              foto 1_menu        # título → menú principal
 if [[ -n "$SIN_COMENTARIO" ]]; then
@@ -77,7 +88,7 @@ teclas "ENTER w2500 DOWN*2 RIGHT*3 w400 ENTER w3000"         # Local: Europa A �
 teclas "ENTER w2500 DOWN*3 RIGHT w400 ENTER w4000"; foto 5_uniforme  # Visitante: Francia
 teclas "ENTER w4000";                      foto 6_ajustes     # uniformes
 # Ajustes generales: la escena de entrada y el estadio se fijan según lo que muestre la captura (ver abajo).
-if [[ -z "$NO_AJUSTAR" ]]; then teclas "DOWN w300 RIGHT w300 DOWN*11 w300 RIGHT w500 UP*12 w400"; fi
+if [[ -z "$NO_AJUSTAR" ]]; then teclas "DOWN w300 RIGHT w300 DOWN*11 w300 RIGHT*${ESTADIO_PASOS:-1} w500"; foto 7a_estadio; teclas "UP*12 w400"; fi
 foto 7_ajustes_fijados
 teclas "ENTER w5000";                      foto 8_formacion   # A ajustes de formación
 teclas "ENTER w25000";                     foto 9_saque       # Comienzo del partido
@@ -105,4 +116,15 @@ terminar
 python3 "$RAIZ/herramientas/analizar_traza.py" "$OUT/traza.trace" > "$RAIZ/pruebas/auto_$N.txt" 2>&1
 rm -rf "$OUT/traza.trace"
 find "${TMPDIR:-/tmp}" -maxdepth 1 -name "instruments*.ktrace" -delete
+[[ -n "$JUEGO_REAL" ]] && cp "$HOME/Library/Application Support/PES6 Mac/ultima_sesion.log" "$OUT/wine.log"
+# FPS que genera el juego (canal "fps" de wined3d, promedio cada ~1,5 s) durante la grabación: no depende de la pantalla
+python3 - "$OUT/wine.log" "$G" >> "$RAIZ/pruebas/auto_$N.txt" <<'PY'
+import re, sys
+v = [float(x) for x in re.findall(r'wined3d_cs_exec_present \S+ @ approx ([\d.]+)fps', open(sys.argv[1], errors='ignore').read())]
+v = v[-int(int(sys.argv[2]) / 1.5):] if v else []
+if v:
+    s = sorted(v); print(f'fps generados (wined3d): prom={sum(v)/len(v):.1f} mediana={s[len(s)//2]:.1f} p10={s[len(s)//10]:.1f}  ' + ' '.join(str(round(x)) for x in v[:40]))
+else:
+    print('fps generados: sin datos (hace falta WINEDEBUG con trace+fps)')
+PY
 cat "$RAIZ/pruebas/auto_$N.txt"
