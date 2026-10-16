@@ -18,7 +18,7 @@ OUT="$RAIZ/pruebas/auto_$N"
 mkdir -p "$OUT"
 
 terminar() {
-    "$WINE" wineserver -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -x "$EXE"; pkill -9 -f 'winetemp-|PES6J.app/Contents/MacOS/|bin/wineserver'
+    "${WINE:h}/wineserver" -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -x "$EXE"; pkill -9 -f 'winetemp-|PES6J.app/Contents/MacOS/|bin/wineserver'
     python3 -c "import time; time.sleep(2)"
 }
 teclas() { "$WINE" "$RAIZ/herramientas/teclas.exe" "$1" >/dev/null 2>&1; }

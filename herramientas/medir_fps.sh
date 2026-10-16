@@ -15,7 +15,7 @@ JUEGO="$RAIZ/PES6 Phoenix 2025-2026"
 LOG="$RAIZ/pruebas/fps_$N.log"
 
 terminar() {  # el juego y todo Wine (SecuROM relanza el exe desde winetemp)
-    "$WINE" wineserver -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -f 'winetemp-|PES6J.app/Contents/MacOS/|wineserver'; sleep 2
+    "${WINE:h}/wineserver" -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -f 'winetemp-|PES6J.app/Contents/MacOS/|wineserver'; sleep 2
 }
 terminar
 # Instruments escribe ~1,3 GB por grabación en la carpeta temporal: no arrancar con poco disco.
