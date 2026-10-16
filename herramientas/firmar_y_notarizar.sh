@@ -14,8 +14,12 @@ IDENTIDAD=$(security find-identity -v -p codesigning | sed -n 's/.*"\(Developer 
 [[ -n "$IDENTIDAD" ]] || { echo "no hay identidad Developer ID Application" >&2; exit 1; }
 echo "firmando como: $IDENTIDAD"
 
+# Temporales en una sola carpeta que se borra al terminar (la copia del DMG y el zip pesan ~1 GB).
+TEMP="$(mktemp -d)"
+trap 'rm -rf "$TEMP"' EXIT
+
 # Wine traduce código x86 y genera código en memoria; Python y Wine cargan librerías propias.
-PERMISOS="$(mktemp -d)/permisos.plist"
+PERMISOS="$TEMP/permisos.plist"
 cat > "$PERMISOS" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -32,7 +36,7 @@ EOF
 firmar() { codesign --force --options runtime --timestamp --entitlements "$PERMISOS" --sign "$IDENTIDAD" "$@"; }
 
 # 1. Todo Mach-O de adentro hacia afuera (librerías primero, ejecutables después, la app al final)
-LISTA="$(mktemp)"
+LISTA="$TEMP/lista"
 find "$APP/Contents" -type f ! -path "*/MacOS/PES6" -print0 | while IFS= read -r -d '' f; do
     file -b "$f" | grep -q "Mach-O" && print -r -- "$f"
 done > "$LISTA"
@@ -44,13 +48,13 @@ codesign --verify --deep --strict --verbose=1 "$APP"
 [[ -n "$SOLO_FIRMAR" ]] && { echo "firmada (sin notarizar)"; exit 0; }
 
 # 2. Notarizar la app y "staplear" el ticket
-ZIP="$(mktemp -d)/PES6.zip"
+ZIP="$TEMP/PES6.zip"
 ditto -c -k --keepParent "$APP" "$ZIP"
 xcrun notarytool submit "$ZIP" --keychain-profile "$PERFIL" --wait
 xcrun stapler staple "$APP"
 
 # 3. DMG: carpeta "PES6 Mac" (app + LÉEME) para arrastrar a Aplicaciones
-ESCENARIO="$(mktemp -d)"
+ESCENARIO="$TEMP/escenario"
 mkdir -p "$ESCENARIO/PES6 Mac"
 ditto "$APP" "$ESCENARIO/PES6 Mac/PES6.app"
 cp "$RAIZ/herramientas/LEEME.txt" "$ESCENARIO/PES6 Mac/LÉEME.txt"
