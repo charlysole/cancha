@@ -21,6 +21,9 @@ export WINEPREFIX="$SOPORTE/prefijo"
 export WINEDEBUG="${WINEDEBUG:-err+all,fixme-all}"
 export MVK_CONFIG_LOG_LEVEL=0
 export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-winemenubuilder.exe=d;mscoree=d;mshtml=d}"
+# msync (sincronización con puertos Mach, de CrossOver): además traslada a macOS las prioridades de hilo
+# que pide el juego; sin esto, los hilos de audio de CRI ADX corren con la prioridad por defecto.
+export WINEMSYNC="${WINEMSYNC:-1}"
 
 [[ -f "$JUEGO/PES6.exe" ]] || { echo "no está PES6.exe en '$JUEGO'" >>"$LOG"; exit 2; }
 echo "=== $(date) — $EXE en $JUEGO, servidor '${SERVIDOR:-ninguno}'" >"$LOG"
@@ -80,7 +83,14 @@ elif [[ -f "$CFG" && "$(head -1 "$CFG")" == "$MARCA" ]]; then
     rm -f "$CFG"
 fi
 
-# --- 4. Lanzar y esperar a que termine ---
+# --- 4. Relatos en memoria ---
+# CRI ADX lee los relatos de dat/s_sound.afs en pleno partido; si una lectura espera al disco, el juego
+# se traba (tirones al hablar el comentarista). Leerlo una vez lo deja en la caché de macOS (~770 MB).
+for AFS in "$JUEGO"/dat/s_sound.afs; do
+    [[ -f "$AFS" ]] && nice cat "$AFS" >/dev/null 2>&1 &
+done
+
+# --- 5. Lanzar y esperar a que termine ---
 cd "$JUEGO" || exit 1
 "$WINE" "$EXE" >>"$LOG" 2>&1
 "$WINE" wineserver -w >/dev/null 2>&1

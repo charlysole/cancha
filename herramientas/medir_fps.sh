@@ -9,26 +9,26 @@ APP="${PES6_APP:-$RAIZ/builds/PES6.app}"
 WINE="$APP/Contents/SharedSupport/wine/bin/wine"
 export WINEPREFIX="${WINEPREFIX:-$RAIZ/prefijo_bench}"
 export WINEDEBUG="${WINEDEBUG:-err-all,fixme-all,trace+fps}"
-export MVK_CONFIG_LOG_LEVEL=0
+export MVK_CONFIG_LOG_LEVEL=${MVK_CONFIG_LOG_LEVEL:-0}
 export WINEDLLOVERRIDES="${WINEDLLOVERRIDES:-winemenubuilder.exe=d;mscoree=d;mshtml=d}"
 JUEGO="$RAIZ/PES6 Phoenix 2025-2026"
 LOG="$RAIZ/pruebas/fps_$N.log"
 
 terminar() {  # el juego y todo Wine (SecuROM relanza el exe desde winetemp)
-    "$WINE" wineserver -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -f 'winetemp-|wineserver'; sleep 2
+    "$WINE" wineserver -k 2>/dev/null; pkill -9 -x PES6.exe; pkill -9 -f 'winetemp-|PES6J.app/Contents/MacOS/|wineserver'; sleep 2
 }
 terminar
 # Instruments escribe ~1,3 GB por grabación en la carpeta temporal: no arrancar con poco disco.
 LIBRE_GB=$(( $(df -k /System/Volumes/Data | awk 'NR==2 {print $4}') / 1048576 ))
 (( LIBRE_GB >= 6 )) || { echo "poco espacio libre (${LIBRE_GB} GB): no se mide"; exit 1; }
-[[ -n "$TRAZA" ]] && (( S < 130 )) && S=130  # la grabación (60 s + 45 s + guardado) debe terminar antes de cerrar
+[[ -n "$TRAZA" ]] && (( S < ${TRAZA_DESDE:-60} + 70 )) && S=$(( ${TRAZA_DESDE:-60} + 70 ))  # la grabación (60 s + 45 s + guardado) debe terminar antes de cerrar
 K='HKLM\SOFTWARE\KONAMIPES6\PX25-26'
 "$WINE" reg add "$K" /v installdir /t REG_SZ /d "Z:${JUEGO//\//\\}\\" /f /reg:32 >/dev/null 2>&1
 cd "$JUEGO"
 "$WINE" PES6.exe >"$LOG" 2>&1 &
-# TRAZA=1: a los 60 s graba 45 s con Instruments (cuadros en pantalla + trabajo de Metal) → analizar_traza.py
+# TRAZA=1: a los TRAZA_DESDE s (60 por defecto) graba 45 s con Instruments (cuadros en pantalla + trabajo de Metal) → analizar_traza.py
 if [[ -n "$TRAZA" ]]; then
-    ( python3 -c "import time; time.sleep(60)"
+    ( python3 -c "import time; time.sleep(${TRAZA_DESDE:-60})"
       rm -rf "$RAIZ/pruebas/traza_$N.trace"
       xcrun xctrace record --instrument Display --instrument 'Metal Application' --instrument GPU \
           --attach "$(pgrep -x PES6.exe | head -1)" --time-limit 45s --output "$RAIZ/pruebas/traza_$N.trace" >/dev/null 2>&1 ) &
@@ -56,4 +56,4 @@ if [[ -d "$RAIZ/pruebas/traza_$N.trace" ]]; then
     python3 "$RAIZ/herramientas/analizar_traza.py" "$RAIZ/pruebas/traza_$N.trace" | tee "$RAIZ/pruebas/traza_$N.txt"
     rm -rf "$RAIZ/pruebas/traza_$N.trace"  # pesa cientos de MB; queda el resumen
 fi
-rm -f "${TMPDIR:-/tmp}"/instruments*.ktrace(N)
+find "${TMPDIR:-/tmp}" -maxdepth 1 -name "instruments*.ktrace" -delete  # Instruments deja ~1,5 GB por grabación

@@ -103,3 +103,24 @@ Pendientes del paso 1: pantalla completa / resolución (settings.exe), joystick,
 - Copia de los binarios (clon APFS, no ocupa espacio extra): `builds/v1.0.0/` = PES6.app firmada, `PES6 Mac.dmg`
   notarizado, notarizacion.log, pes6.sqlite del servidor, SHA256SUMS.
 - Volver a v1.0.0: `git checkout v1.0.0` (código) + usar `builds/v1.0.0/` (binarios). Mejoras nuevas en ramas aparte.
+
+## Fluidez (2026-10-15/16, rama mejora/rendimiento)
+- Medición: `herramientas/medir_fps.sh` (demo del título, prefijo `prefijo_bench`, copia del juego del repo) +
+  `TRAZA=1` (Instruments Display + Metal) → `analizar_traza.py` (duración real de cada cuadro en pantalla).
+  OJO disco: Instruments deja 1,5 GB por grabación en $TMPDIR; System Trace = 5 GB cada 10 s en partido → no usar.
+  La demo elige partido al azar; la presentación previa (alineación, paneo del estadio) va a 30 FPS a propósito.
+- GPU sobrada (1-2 ms por cuadro aun en 4K). Partido a 60 FPS con tirones sueltos (33 ms y ~80 ms).
+- **msync (`WINEMSYNC=1`) los reduce a la mitad y elimina los de ~80 ms** (sin narración: 0,27 → 0,13 por segundo).
+  Además el wineserver de CX traslada las prioridades de hilo a macOS solo con msync.
+- Con narración siguen tirones de ~80 ms al hablar el comentarista (CRI ADX + DirectSound). No es el disco: la
+  lectura de `dat/s_sound.afs` tarda <1 ms (igual se precarga en caché al lanzar). Con WINEDEBUG +dsound,+file
+  activo no aparecieron (problema de tiempos entre hilos). Pendiente.
+- Descartado: esync (sin cambio claro), renderer Vulkan de wined3d (mucho peor), ENB d3d8→d3d9 (algo peor),
+  ReservedMemory 900 MB, resolución interna 1080p, sacar módulos de kitserver (sin cambio).
+- DXVK: los oficiales 2.x/3.x exigen geometry shaders (Metal no tiene). dgVoodoo (dlls_01 de Phoenix) + DXVK-macOS
+  1.10.3 anda y baja la CPU de gráficos de ~5 ms a 0,1 ms, pero los tirones siguen (no venían de ahí) y a pantalla
+  completa recrea la cadena sin parar (vkAcquireNextImage espera 1 s) → congelones. `herramientas/variante_dxvk.sh`.
+- Modo Juego de macOS: requiere que la ventana sea de un proceso dentro de un .app "juego" en carpeta legible
+  (parche al texto "/winetemp-%llu-%llu-%lu-%lu/" de ntdll.so → "/PES6J.app/Contents/MacOS/" + Info.plist con
+  LSApplicationCategoryType). Se activa ("Game mode enabled"), pero sin mejora medible. No incorporado.
+- Pantalla en espejo con la MacBook: el usuario nota mejor en "Pantalla extendida".
