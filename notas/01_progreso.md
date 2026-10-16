@@ -97,3 +97,9 @@ Pendientes del paso 1: pantalla completa / resolución (settings.exe), joystick,
 - `lanzador.sh`: HKCU\Software\Wine\Mac Driver CaptureDisplaysForFullscreen=y (refuerzo; el motor CX24 la soporta).
 - Probado en M4 Pro (pantalla externa 1920x1080 + interna): cartel visible, juego a los ~17 s, activo, capa
   2147483629 por encima de la barra de menú.
+
+## Release estable v1.0.0 (2026-10-15)
+- Tag git `v1.0.0` → commit 0642274. Todo probado y funcionando (app, lanzador Wine, servidor).
+- Copia de los binarios (clon APFS, no ocupa espacio extra): `builds/v1.0.0/` = PES6.app firmada, `PES6 Mac.dmg`
+  notarizado, notarizacion.log, pes6.sqlite del servidor, SHA256SUMS.
+- Volver a v1.0.0: `git checkout v1.0.0` (código) + usar `builds/v1.0.0/` (binarios). Mejoras nuevas en ramas aparte.
