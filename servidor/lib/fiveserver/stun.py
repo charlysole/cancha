@@ -56,6 +56,7 @@ class ServidorSTUN:
         self.ip_local = ip_local or ip_anunciada
         self.principal = _Puerto(self, PUERTO_PRINCIPAL)
         self.alternativo = _Puerto(self, PUERTO_ALTERNATIVO)
+        self.puente = None          # puente.Puente: el tráfico de partido que entra por 3478
 
     def escuchar(self, reactor, interfaz=''):
         reactor.listenUDP(PUERTO_PRINCIPAL, self.principal, interface=interfaz)
@@ -89,9 +90,13 @@ class ServidorSTUN:
 
     def recibido(self, puerto, datos, cliente):
         if len(datos) < 20:
+            if self.puente and puerto is self.principal:
+                self.puente.desde_afuera(datos, cliente)
             return
         tipo, _largo = struct.unpack('!HH', datos[:4])
         if tipo != BINDING_REQUEST:
+            if self.puente and puerto is self.principal:
+                self.puente.desde_afuera(datos, cliente)
             return
         id_transaccion = datos[4:20]
         cambio = _atributos(datos).get(CHANGE_REQUEST, b'\0\0\0\0')

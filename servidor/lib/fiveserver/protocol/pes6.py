@@ -435,14 +435,15 @@ class MainService(RosterHandler, pes5.MainService):
         if room is not None:
             # send stun info of players in room to requester
             for usr in room.players:
+                ip1, port1, ip2, port2 = pes5.direccionesP2P(usr, self._user)
                 data = (b'%(pad1)s%(ip1)s%(port1)s'
                     b'%(ip2)s%(port2)s%(id)s'
                     b'%(someField)s%(participate)s') % {
                 b'pad1': b'\0'*32,
-                b'ip1': util.padWithZeros(usr.state.ip1, 16),
-                b'port1': struct.pack('!H', usr.state.udpPort1),
-                b'ip2': util.padWithZeros(usr.state.ip2, 16),
-                b'port2': struct.pack('!H', usr.state.udpPort2),
+                b'ip1': util.padWithZeros(ip1, 16),
+                b'port1': struct.pack('!H', port1),
+                b'ip2': util.padWithZeros(ip2, 16),
+                b'port2': struct.pack('!H', port2),
                 b'id': struct.pack('!i', usr.profile.id),
                 b'someField': struct.pack('!H', 0),
                 b'participate': struct.pack('!B', 
@@ -651,14 +652,15 @@ class MainService(RosterHandler, pes5.MainService):
         for otherUsr in room.players:
             if otherUsr == self._user:
                 continue
+            ip1, port1, ip2, port2 = pes5.direccionesP2P(self._user, otherUsr)
             data = (b'%(pad1)s%(ip1)s%(port1)s'
             b'%(ip2)s%(port2)s%(id)s'
             b'%(someField)s%(participate)s') % {
             b'pad1': b'\0'*36,
-            b'ip1': util.padWithZeros(self._user.state.ip1, 16),
-            b'port1': struct.pack('!H', self._user.state.udpPort1),
-            b'ip2': util.padWithZeros(self._user.state.ip2, 16),
-            b'port2': struct.pack('!H', self._user.state.udpPort2),
+            b'ip1': util.padWithZeros(ip1, 16),
+            b'port1': struct.pack('!H', port1),
+            b'ip2': util.padWithZeros(ip2, 16),
+            b'port2': struct.pack('!H', port2),
             b'id': struct.pack('!i', self._user.profile.id),
             b'someField': struct.pack('!H', 0),
             b'participate': struct.pack('!B', 
@@ -699,14 +701,15 @@ class MainService(RosterHandler, pes5.MainService):
         for otherUsr in room.players:
             if otherUsr == self._user:
                 continue
+            ip1, port1, ip2, port2 = pes5.direccionesP2P(otherUsr, self._user)
             data = (b'%(pad1)s%(ip1)s%(port1)s'
             b'%(ip2)s%(port2)s%(id)s'
             b'%(someField)s%(participate)s') % {
             b'pad1': b'\0'*32,
-            b'ip1': util.padWithZeros(otherUsr.state.ip1, 16),
-            b'port1': struct.pack('!H', otherUsr.state.udpPort1),
-            b'ip2': util.padWithZeros(otherUsr.state.ip2, 16),
-            b'port2': struct.pack('!H', otherUsr.state.udpPort2),
+            b'ip1': util.padWithZeros(ip1, 16),
+            b'port1': struct.pack('!H', port1),
+            b'ip2': util.padWithZeros(ip2, 16),
+            b'port2': struct.pack('!H', port2),
             b'id': struct.pack('!i', otherUsr.profile.id),
             b'someField': struct.pack('!H', 0),
             b'participate': struct.pack('!B', 

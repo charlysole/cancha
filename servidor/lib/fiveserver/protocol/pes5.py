@@ -24,6 +24,34 @@ from fiveserver.protocol import PacketDispatcher, isSameGame
 CHAT_HISTORY_DELAY = 3  # seconds
 
 
+PUENTE = None  # puente.Puente (lo pone servidor_pes6.py)
+
+
+def direccionesP2P(usr, para):
+    """
+    ip1, puerto1, ip2, puerto2 de usr tal como se le mandan a 'para'.
+    - Entre un juego de esta casa (el que hostea) y uno de afuera, el partido
+      pasa por el puente UDP del servidor (ver puente.py).
+    - Si están en redes distintas, ip2 = ip1: si las dos casas usan la misma
+      subred (192.168.1.x es lo más común), el juego de 'para' le mandaría el
+      partido a la IP local de usr dentro de SU propia red.
+    """
+    s, otro = usr.state, para.state
+    ip_usr = util.stripZeros(s.ip1).decode('latin-1')
+    ip_para = util.stripZeros(otro.ip1).decode('latin-1')
+    if PUENTE and ip_usr != ip_para:
+        if PUENTE.de_esta_casa(ip_para):
+            ip = PUENTE.ip_local.encode()
+            puerto = PUENTE.puerto_para((ip_usr, s.udpPort1))
+            return ip, puerto, ip, puerto
+        if PUENTE.de_esta_casa(ip_usr):
+            ip = PUENTE.ip_publica.encode()
+            return ip, PUENTE.puerto_afuera, ip, PUENTE.puerto_afuera
+    if ip_usr != ip_para:
+        return s.ip1, s.udpPort1, s.ip1, s.udpPort1
+    return s.ip1, s.udpPort1, s.ip2, s.udpPort2
+
+
 class NewsProtocol(PacketDispatcher):
 
     GREETING = {
@@ -1107,8 +1135,7 @@ class MainService(NetworkMenuService):
         thisLobby = self.factory.getLobbies()[self._user.state.lobbyId]
         usr = thisLobby.getPlayerByProfileId(profileId)
         if usr:
-            ip1, udpPort1 = usr.state.ip1, usr.state.udpPort1
-            ip2, udpPort2 = usr.state.ip2, usr.state.udpPort2
+            ip1, udpPort1, ip2, udpPort2 = direccionesP2P(usr, self._user)
             """
             NOTE: Looks like the game itself is smart about
             using the internal IP in such situations. Disabling

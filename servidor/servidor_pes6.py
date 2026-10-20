@@ -26,7 +26,8 @@ from twisted.internet import reactor, defer  # noqa: E402
 
 from fiveserver import log, data6, logic, errors, storagecontroller  # noqa: E402
 from fiveserver.config import FiveServerConfig, YamlConfig  # noqa: E402
-from fiveserver.protocol import PacketServiceFactory, pes6  # noqa: E402
+from fiveserver.protocol import PacketServiceFactory, pes5, pes6  # noqa: E402
+from fiveserver.puente import Puente  # noqa: E402
 from fiveserver.sqlite_pool import SQLitePool  # noqa: E402
 from fiveserver.stun import ServidorSTUN  # noqa: E402
 from fiveserver import upnp  # noqa: E402
@@ -127,7 +128,9 @@ def main():
     for puerto, factory in servicios:
         reactor.listenTCP(puerto, factory, interface=a.escuchar)
         log.msg('Escuchando en TCP %d (%s)' % (puerto, factory.protocol.__name__))
-    ServidorSTUN(ip_publica, ip_local).escuchar(reactor, a.escuchar)
+    stun = ServidorSTUN(ip_publica, ip_local)
+    stun.escuchar(reactor, a.escuchar)
+    stun.puente = pes5.PUENTE = Puente(reactor, ip_publica, ip_local, stun.principal)
     if router:
         abrir_puertos(router, scfg)
 
