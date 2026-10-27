@@ -6,7 +6,7 @@
 # Variables del entorno (WINEMSYNC, WINEDLLOVERRIDES, PES6_APP...) pasan al juego.
 RAIZ="${0:A:h:h}"
 N=$1; G=${2:-90}
-APP="${PES6_APP:-$RAIZ/builds/PES6.app}"
+APP="${PES6_APP:-$RAIZ/builds/Cancha.app}"
 WINE="$APP/Contents/SharedSupport/wine/bin/wine"
 export WINEPREFIX="${WINEPREFIX:-$RAIZ/prefijo_bench}"
 export WINEDEBUG="${WINEDEBUG:-err-all,fixme-all,trace+fps}"
@@ -16,9 +16,15 @@ JUEGO="$RAIZ/PES6 Phoenix 2025-2026"
 # JUEGO_REAL=1: la instalación del usuario tal cual (app de Aplicaciones, su carpeta de juego y su prefijo),
 # lanzada con el lanzador de la app (msync, pes6mac.dll, kload.cfg) como cuando toca "Jugar".
 if [[ -n "$JUEGO_REAL" ]]; then
-    APP="/Applications/PES6 Mac/PES6.app"; WINE="$APP/Contents/SharedSupport/wine/bin/wine"
-    JUEGO="/Applications/PES6 Mac/PES6 Phoenix 2025-2026"
-    export WINEPREFIX="$HOME/Library/Application Support/PES6 Mac/prefijo" WINEMSYNC=1
+    # Nombre nuevo (Cancha) si ya está instalado; si no, el de la versión 1.3 y anteriores (PES6 Mac).
+    if [[ -d "/Applications/Cancha/Cancha.app" ]]; then
+        CARPETA="/Applications/Cancha"; APP="$CARPETA/Cancha.app"; SOPORTE="$HOME/Library/Application Support/Cancha"
+    else
+        CARPETA="/Applications/PES6 Mac"; APP="$CARPETA/PES6.app"; SOPORTE="$HOME/Library/Application Support/PES6 Mac"
+    fi
+    WINE="$APP/Contents/SharedSupport/wine/bin/wine"
+    JUEGO="$CARPETA/PES6 Phoenix 2025-2026"
+    export WINEPREFIX="$SOPORTE/prefijo" WINEMSYNC=1
 fi
 EXE="${PES6_EXE:-PES6.exe}"   # p. ej. PES6_prio.exe (copia parcheada)
 OUT="$RAIZ/pruebas/auto_$N"
@@ -116,7 +122,7 @@ terminar
 python3 "$RAIZ/herramientas/analizar_traza.py" "$OUT/traza.trace" > "$RAIZ/pruebas/auto_$N.txt" 2>&1
 rm -rf "$OUT/traza.trace"
 find "${TMPDIR:-/tmp}" -maxdepth 1 -name "instruments*.ktrace" -delete
-[[ -n "$JUEGO_REAL" ]] && cp "$HOME/Library/Application Support/PES6 Mac/ultima_sesion.log" "$OUT/wine.log"
+[[ -n "$JUEGO_REAL" ]] && cp "$SOPORTE/ultima_sesion.log" "$OUT/wine.log"
 # FPS que genera el juego (canal "fps" de wined3d, promedio cada ~1,5 s) durante la grabación: no depende de la pantalla
 python3 - "$OUT/wine.log" "$G" >> "$RAIZ/pruebas/auto_$N.txt" <<'PY'
 import re, sys

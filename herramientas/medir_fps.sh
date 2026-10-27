@@ -5,7 +5,7 @@
 # Variables extra (WINEDLLOVERRIDES, WINEMSYNC, etc.) se pasan por el entorno.
 RAIZ="${0:A:h:h}"
 N=$1; S=${2:-150}
-APP="${PES6_APP:-$RAIZ/builds/PES6.app}"
+APP="${PES6_APP:-$RAIZ/builds/Cancha.app}"
 WINE="$APP/Contents/SharedSupport/wine/bin/wine"
 export WINEPREFIX="${WINEPREFIX:-$RAIZ/prefijo_bench}"
 export WINEDEBUG="${WINEDEBUG:-err-all,fixme-all,trace+fps}"

@@ -1,0 +1,55 @@
+Cancha — licencias de terceros
+==============================
+
+Cancha es un launcher para jugar PES6 en Mac. No incluye el juego ni ningún archivo de Konami: cada
+usuario pone su propia copia. Cancha no está afiliado a Konami ni lo respalda Konami. "Pro Evolution Soccer"
+y "PES" son marcas de Konami Digital Entertainment.
+
+La app incluye estos componentes de terceros, cada uno con su licencia. Los textos completos están en esta
+misma carpeta.
+
+Motor Wine (Contents/SharedSupport/wine)
+----------------------------------------
+- Wine, versión de CodeWeavers 24.0.7, compilado por el proyecto Sikarugir (motor WS12WineCX24.0.7).
+  Licencia: LGPL 2.1 o posterior (LGPL-2.1.txt).
+  Código fuente: https://media.codeweavers.com/pub/crossover/source/crossover-sources-24.0.7.tar.gz
+                 https://github.com/Sikarugir-App/Sikarugir-foss-sources
+- Librerías que usa Wine (compiladas por Gcenx con MacPorts, sin modificar):
+    GnuTLS, libtasn1, libiconv, libcharset, gettext (libintl) ........ LGPL 2.1 o posterior (LGPL-2.1.txt)
+    GMP, Nettle/Hogweed, libunistring, libidn2 ....................... LGPL 3 o GPL 2 (LGPL-3.0.txt, GPL-2.0.txt)
+    FreeType ......................................................... FreeType License (FTL.txt)
+    ICU .............................................................. Unicode License v3 (Unicode-3.0.txt)
+    MoltenVK ......................................................... Apache 2.0 (Apache-2.0.txt)
+    SDL2, zlib ....................................................... zlib (Zlib.txt)
+    bzip2 ............................................................ licencia de bzip2 (bzip2-1.0.6.txt)
+    libpng ........................................................... licencia de libpng (libpng-2.0.txt)
+    libffi, libxml2, libxslt/libexslt, brotli, libinotify, macports-legacy-support .... MIT
+    zstd, lz4, libpcap, p11-kit ...................................... BSD
+    xz (liblzma) ..................................................... dominio público / BSD-0
+  Código fuente: https://github.com/Gcenx/macOS_Wine_builds y los paquetes de MacPorts
+                 (https://ports.macports.org) de cada librería.
+
+Servidor online (Contents/Resources/servidor y python)
+------------------------------------------------------
+- fiveserver (c) 2011-2021 juce, reddwarf — licencia BSD (servidor/LICENSE-fiveserver). Adaptado para Cancha.
+- Python 3.12 (python-build-standalone) — PSF License (python/lib/python3.12/LICENSE.txt, que también lista
+  las licencias de las librerías que trae Python).
+- Twisted, attrs, Automat, constantly, hyperlink, idna, incremental, packaging, PyYAML, pycryptodome,
+  typing_extensions, zope.interface — licencias MIT, BSD, Apache 2.0 o PSF; cada una está en la carpeta
+  *.dist-info/ del paquete, dentro de python/lib/python3.12/site-packages.
+
+Arreglos para Mac (Contents/Resources/pes6mac.dll)
+--------------------------------------------------
+- stb_image (c) 2017 Sean Barrett — MIT o dominio público, a elección.
+
+Oferta de código fuente
+-----------------------
+Para las partes con licencia LGPL o GPL: durante al menos 3 años desde la última vez que distribuimos esta
+versión, cualquiera puede pedirnos una copia completa del código fuente correspondiente, en un medio de uso
+habitual y sin costo más allá del envío. También está publicado junto a la descarga:
+
+    Fuentes:  {{FUENTES}}
+    Contacto: {{CONTACTO}}
+
+Wine y las librerías LGPL están enlazadas dinámicamente: se pueden reemplazar por otras versiones
+modificadas cambiando los archivos de Contents/SharedSupport/wine.

@@ -2,7 +2,7 @@
 # Uso: paso.sh "<teclas>" <nombre-captura> [espera_s]
 # Manda teclas al juego de pruebas (prefijo_bench) con teclas.exe y captura su ventana después.
 RAIZ="${0:A:h:h}"
-WINE="${PES6_APP:-$RAIZ/builds/PES6.app}/Contents/SharedSupport/wine/bin/wine"
+WINE="${PES6_APP:-$RAIZ/builds/Cancha.app}/Contents/SharedSupport/wine/bin/wine"
 export WINEPREFIX="${WINEPREFIX:-$RAIZ/prefijo_bench}" WINEDEBUG=-all
 [[ -n "$WINEMSYNC_BENCH" ]] && export WINEMSYNC=1
 "$WINE" "$RAIZ/herramientas/teclas.exe" "$1" 2>&1 | grep -v '^$' | head -3

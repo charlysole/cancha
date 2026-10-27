@@ -1,21 +1,23 @@
-PES6 para Mac
-=============
+Cancha
+======
 
-Esta app corre PES6 (con el parche Phoenix) en cualquier Mac, Intel o Apple Silicon, y permite
+Launcher para jugar PES6 (Pro Evolution Soccer 6 para PC) en cualquier Mac, Intel o Apple Silicon, y
 jugar online entre amigos sin registrarse en ningún sitio.
+
+Cancha es un proyecto independiente y gratuito. No está afiliado a Konami ni lo respalda Konami.
+"Pro Evolution Soccer" y "PES" son marcas de Konami Digital Entertainment.
+LA APP NO INCLUYE EL JUEGO: necesitás tu propia copia de PES6 para PC, instalada.
 
 Instalación
 -----------
-1. Arrastrá la carpeta «PES6 Mac» a Aplicaciones.
-2. Conseguí el juego: PES6 Phoenix Patch 2025/26 Final Season (gratis, trae el juego completo).
-     Buscalo en el foro de la comunidad PES6.ES (hilo oficial del parche).
-   Es un instalador de Windows: instalalo en una PC con Windows y anotá el número de serie
-   que usás (la app te lo pide para el online). Después copiá la carpeta instalada
-   (la que tiene PES6.exe) adentro de «PES6 Mac», al lado de PES6.app.
-   Si la tenés en otro lado, la app te la pide la primera vez.
-   Conviene la misma versión que tu amigo (Phoenix 25.12): si las plantillas son distintas,
-   el partido se desincroniza.
-3. Abrí PES6.app. En Mac con Apple Silicon te puede pedir instalar Rosetta (una sola vez).
+1. Arrastrá la carpeta «Cancha» a Aplicaciones.
+2. Copiá tu PES6 instalado (la carpeta que tiene PES6.exe) adentro de «Cancha», al lado de
+   Cancha.app. El instalador del juego es de Windows: instalalo en una PC con Windows y copiá
+   la carpeta. Si la tenés en otro lado, la app te la pide la primera vez.
+   Anotá el código de registro que pusiste al instalar: la app te lo pide.
+   Probado con PES6 y el parche Phoenix 2025/26 (comunidad PES6.ES). Para jugar online, los dos
+   tienen que tener la misma instalación: si las plantillas son distintas, el partido se desincroniza.
+3. Abrí Cancha.app. En Mac con Apple Silicon te puede pedir instalar Rosetta (una sola vez).
 
 Jugar
 -----
@@ -25,22 +27,23 @@ Jugar
   lo permite, te dice qué puertos abrir a mano.
 - Unirse: escribí la dirección que te pasó el que hostea y tocá «Unirse».
 
-Para el online el juego pide tu CÓDIGO DE REGISTRO de PES6 (el serial de tu copia). La app
-lo pide una vez y lo guarda en esta Mac. La contraseña puede ser cualquiera: la cuenta se
-crea sola en el servidor del que hostea.
+El juego necesita el CÓDIGO DE REGISTRO de tu copia de PES6. La app lo pide una vez y lo
+guarda en esta Mac. Para el online, la contraseña puede ser cualquiera: la cuenta se crea
+sola en el servidor del que hostea.
 
 Opciones
 --------
 - Pantalla completa: casilla en la ventana de inicio.
-- Calidad gráfica (menú PES6 > Calidad gráfica): automática según tu Mac, o fija.
+- Calidad gráfica (menú Cancha > Calidad gráfica): automática según tu Mac, o fija.
 - Controles…: abre el configurador del juego (teclado y joysticks, pestañas Player1-8).
   Los mandos de PlayStation, Xbox y similares se reconocen por Bluetooth o USB.
 
-Instrucciones completas: https://github.com/charlysole/pes6-online-mac
+Licencias de los componentes de terceros (Wine, Python, fiveserver…) y oferta de código fuente:
+Cancha.app > clic derecho > Mostrar contenido del paquete > Contents/Resources/Licencias.
 
 Problemas
 ---------
 El registro de la última sesión está en:
-  ~/Library/Application Support/PES6 Mac/ultima_sesion.log
+  ~/Library/Application Support/Cancha/ultima_sesion.log
 y el del servidor (si hosteaste) en:
-  ~/Library/Application Support/PES6 Mac/servidor/servidor.log
+  ~/Library/Application Support/Cancha/servidor/servidor.log

@@ -76,7 +76,7 @@ def main():
     p.add_argument('--datos', default=os.path.join(RAIZ, 'datos'),
                    help='carpeta para la base de datos y el log')
     p.add_argument('--escuchar', default='', help='interfaz donde escuchar (vacío = todas)')
-    p.add_argument('--nombre', default='PES6 Mac', help='nombre del servidor')
+    p.add_argument('--nombre', default='Cancha', help='nombre del servidor')
     p.add_argument('--debug', action='store_true')
     a = p.parse_args()
 

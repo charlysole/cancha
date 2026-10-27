@@ -1,4 +1,4 @@
-// PES6 Mac — ventana de inicio.
+// Cancha — ventana de inicio de un launcher para jugar PES6 en Mac (no afiliado a Konami).
 //
 //   Jugar            juego normal (sin servidor propio)
 //   Hostear partido  levanta el servidor (Python + fiveserver dentro de la app), abre los puertos del
@@ -12,7 +12,16 @@ import AppKit
 import CoreGraphics
 
 let soporte = FileManager.default.homeDirectoryForCurrentUser
-    .appendingPathComponent("Library/Application Support/PES6 Mac")
+    .appendingPathComponent("Library/Application Support/Cancha")
+
+/// Hasta la versión 1.3 la app se llamaba "PES6 Mac": sus datos (serial, prefijo de Wine, servidor) se mudan
+/// una sola vez a la carpeta nueva.
+func mudarDatosViejos() {
+    let viejo = soporte.deletingLastPathComponent().appendingPathComponent("PES6 Mac")
+    let fm = FileManager.default
+    guard fm.fileExists(atPath: viejo.path), !fm.fileExists(atPath: soporte.path) else { return }
+    try? fm.moveItem(at: viejo, to: soporte)
+}
 let recursos = Bundle.main.resourceURL!
 
 func leer(_ nombre: String) -> String? {
@@ -117,6 +126,7 @@ func resolucionInterna(_ ancho: Int, _ alto: Int) -> (Int, Int)? {
     return (w, objetivo)
 }
 
+// Marcas con el nombre viejo de la app: así se reconocen los bloques que escribieron las versiones anteriores.
 let inicioBloque = "# --- PES6 Mac: pantalla (lo reescribe la app) ---"
 let finBloque = "# --- fin PES6 Mac ---"
 
@@ -191,7 +201,7 @@ func pedirSerial(obligatorio: Bool) -> Bool {
     if let s = leer("serial.txt"), s.count == 20 { return true }
     let a = NSAlert()
     a.messageText = "Código de registro de PES6"
-    a.informativeText = "Para jugar online hace falta tu código de registro (20 letras y números, con o sin guiones). Se guarda en esta Mac y no se manda a ningún lado salvo al juego."
+    a.informativeText = "El juego necesita el código de registro de tu copia de PES6: el que pusiste al instalarlo (20 letras y números, con o sin guiones). Se guarda en esta Mac y no se manda a ningún lado salvo al juego."
     let campo = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
     campo.placeholderString = "XXXX-XXXX-XXXX-XXXX-XXXX"
     a.accessoryView = campo
@@ -314,14 +324,15 @@ final class Controlador: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var esperaVentana: Timer?
 
     func applicationDidFinishLaunching(_ n: Notification) {
+        mudarDatosViejos()
         armarMenu()
         armarVentana()
         NSApp.activate(ignoringOtherApps: true)
 
         if Bundle.main.bundlePath.contains("/AppTranslocation/") ||
             Bundle.main.bundlePath.hasPrefix("/Volumes/") {
-            alerta("Copiá PES6 a tu Mac",
-                   "Arrastrá la carpeta «PES6 Mac» del disco a Aplicaciones y abrí la app desde ahí. Desde el disco no se puede jugar porque el juego necesita guardar datos en su carpeta.")
+            alerta("Copiá Cancha a tu Mac",
+                   "Arrastrá la carpeta «Cancha» del disco a Aplicaciones y abrí la app desde ahí. Desde el disco no se puede jugar porque el juego necesita guardar datos en su carpeta.")
             NSApp.terminate(nil)
             return
         }
@@ -354,7 +365,7 @@ final class Controlador: NSObject, NSApplicationDelegate, NSWindowDelegate {
         calidad.submenu = opciones
         sub.addItem(calidad)
         sub.addItem(.separator())
-        sub.addItem(withTitle: "Salir de PES6", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        sub.addItem(withTitle: "Salir de Cancha", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         item.submenu = sub
         NSApp.mainMenu = menu
     }
@@ -377,11 +388,11 @@ final class Controlador: NSObject, NSApplicationDelegate, NSWindowDelegate {
     func armarVentana() {
         ventana = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 460, height: 400),
                            styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
-        ventana.title = "PES6"
+        ventana.title = "Cancha"
         ventana.delegate = self
 
-        let titulo = etiqueta("PES6 Phoenix", 26, .bold)
-        let sub = etiqueta("Pro Evolution Soccer 6 para Mac", 13)
+        let titulo = etiqueta("Cancha", 26, .bold)
+        let sub = etiqueta("Para jugar PES6 en Mac, solo y online con amigos", 13)
         sub.textColor = .secondaryLabelColor
 
         let jugar = boton("Jugar", #selector(jugar), principal: true)
@@ -451,9 +462,15 @@ final class Controlador: NSObject, NSApplicationDelegate, NSWindowDelegate {
         NSPasteboard.general.setString(direccion.stringValue, forType: .string)
     }
 
-    @objc func jugar() { lanzar(servidor: "") }
+    @objc func jugar() {
+        guard pedirSerial(obligatorio: true) else { return }
+        lanzar(servidor: "")
+    }
 
-    @objc func controles() { lanzar(servidor: "", exe: "settings.exe") }
+    @objc func controles() {
+        guard pedirSerial(obligatorio: true) else { return }
+        lanzar(servidor: "", exe: "settings.exe")
+    }
 
     @objc func unirse() {
         let ip = campoIP.stringValue.trimmingCharacters(in: .whitespaces)
@@ -499,7 +516,7 @@ final class Controlador: NSObject, NSApplicationDelegate, NSWindowDelegate {
                 if !listo {
                     self.cartel.ocultar()
                     self.ocupado(false)
-                    self.estado.stringValue = "El servidor no pudo arrancar. Mirá ~/Library/Application Support/PES6 Mac/servidor/servidor.log"
+                    self.estado.stringValue = "El servidor no pudo arrancar. Mirá ~/Library/Application Support/Cancha/servidor/servidor.log"
                 }
                 self.servidor = nil
             }

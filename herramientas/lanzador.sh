@@ -1,16 +1,16 @@
 #!/bin/zsh
-# Motor de arranque de PES6 (lo llama la app nativa, Contents/MacOS/PES6).
+# Motor de arranque de PES6 (lo llama la app nativa, Contents/MacOS/Cancha).
 # Corre el PES6.exe original con el Wine (código de CrossOver) que va dentro de la app.
 #
 # Variables que recibe:
 #   PES6_JUEGO     carpeta del juego (la que tiene PES6.exe)          [obligatoria]
 #   PES6_SERVIDOR  IP/nombre del servidor online ("" = sin servidor propio)
 #   PES6_EXE       PES6.exe (por defecto) o settings.exe
-# Lee el serial de ~/Library/Application Support/PES6 Mac/serial.txt (lo guarda la app).
+# Lee el serial de ~/Library/Application Support/Cancha/serial.txt (lo guarda la app; sin él no arranca).
 
 APP="${0:A:h:h:h}"
 WINE="$APP/Contents/SharedSupport/wine/bin/wine"
-SOPORTE="$HOME/Library/Application Support/PES6 Mac"
+SOPORTE="$HOME/Library/Application Support/Cancha"
 mkdir -p "$SOPORTE"
 LOG="$SOPORTE/ultima_sesion.log"
 JUEGO="$PES6_JUEGO"
@@ -27,6 +27,10 @@ export WINEMSYNC="${WINEMSYNC:-1}"
 
 [[ -f "$JUEGO/PES6.exe" ]] || { echo "no está PES6.exe en '$JUEGO'" >>"$LOG"; exit 2; }
 echo "=== $(date) — $EXE en $JUEGO, servidor '${SERVIDOR:-ninguno}'" >"$LOG"
+# Siempre el serial de la copia del usuario: no hay uno por defecto.
+SERIAL=""
+[[ -f "$SOPORTE/serial.txt" ]] && SERIAL="$(<"$SOPORTE/serial.txt")"
+[[ ${#SERIAL} -eq 20 ]] || { echo "falta el código de registro (serial.txt)" >>"$LOG"; exit 3; }
 
 # --- 1. Prefijo de Wine (la primera vez) ---
 if [[ ! -f "$WINEPREFIX/system.reg" ]]; then
@@ -43,8 +47,6 @@ grep -q '"CaptureDisplaysForFullscreen"="y"' "$WINEPREFIX/user.reg" 2>/dev/null 
 # --- 2. Clave de registro que crea el instalador de Windows ---
 # Sin ella: "The game is not properly installed". CODE = serial (el juego lo compara con el de Conectar).
 K='HKLM\SOFTWARE\KONAMIPES6\PX25-26'
-SERIAL=AAAAAAAAAAAAAAAAAAAA
-[[ -f "$SOPORTE/serial.txt" ]] && SERIAL="$(<"$SOPORTE/serial.txt")"
 "$WINE" reg add "$K" /v installdir /t REG_SZ /d "Z:${JUEGO//\//\\}\\" /f /reg:32 >>"$LOG" 2>&1
 "$WINE" reg add "$K" /v lang_s /t REG_SZ /d s /f /reg:32 >>"$LOG" 2>&1
 "$WINE" reg add "$K" /v CODE /t REG_SZ /d "$SERIAL" /f /reg:32 >>"$LOG" 2>&1
@@ -74,7 +76,7 @@ fi
 #     Sus opciones "server" y "stun-server" se leen de kitserver/roster.cfg: lo generamos.
 #     Solo se borra si lo creó esta app (marca en la primera línea).
 CFG="$JUEGO/kitserver/roster.cfg"
-MARCA="# generado por PES6 Mac"
+MARCA="# generado por PES6 Mac"  # nombre viejo de la app: así se reconocen los cfg de versiones anteriores
 if [[ -n "$SERVIDOR" ]]; then
     if [[ ! -f "$CFG" || "$(head -1 "$CFG")" == "$MARCA" ]]; then
         printf '%s\nserver = "%s"\nstun-server = "%s"\n' "$MARCA" "$SERVIDOR" "$SERVIDOR" > "$CFG"
