@@ -8,7 +8,9 @@ pkill -f PES6.exe; sleep 1
 K='HKLM\SOFTWARE\KONAMIPES6\PX25-26'
 "$WINE" reg add "$K" /v installdir /t REG_SZ /d "Z:${RAIZ//\//\\}\\PES6 Phoenix 2025-2026\\" /f /reg:32 >/dev/null 2>&1
 "$WINE" reg add "$K" /v lang_s /t REG_SZ /d s /f /reg:32 >/dev/null 2>&1
-"$WINE" reg add "$K" /v CODE /t REG_SZ /d AAAAAAAAAAAAAAAAAAAA /f /reg:32 >/dev/null 2>&1
+# El serial de la copia del usuario (lo guarda la app): nunca uno inventado
+SERIAL="$(<"$HOME/Library/Application Support/Cancha/serial.txt")" || exit 1
+"$WINE" reg add "$K" /v CODE /t REG_SZ /d "$SERIAL" /f /reg:32 >/dev/null 2>&1
 cd "$RAIZ/PES6 Phoenix 2025-2026"
 ("$WINE" PES6.exe > $RAIZ/pruebas/$N.log 2>&1 &)
 python3 -c "import time; time.sleep($S)"

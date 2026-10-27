@@ -17,7 +17,7 @@ Launcher para jugar **PES6** (Pro Evolution Soccer 6 para PC) en cualquier Mac �
 
 ### 1. La app
 
-1. Bajá `Cancha.dmg` (firmado y notarizado por Apple).
+1. Bajá `Cancha.dmg` de [pradosoftware.com/cancha](https://pradosoftware.com/cancha/) (firmado y notarizado por Apple).
 2. Arrastrá la carpeta **Cancha** a Aplicaciones.
 
 ### 2. El juego
